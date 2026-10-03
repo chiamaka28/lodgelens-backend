@@ -1,0 +1,367 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.Roles",
+    "label": "Create enum type \"Roles\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "Roles"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"Roles\"",
+        "sql": "CREATE TYPE \"public\".\"Roles\" AS ENUM ('STUDENT', 'LODGE_OWNER', 'ADMIN')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.RoomType",
+    "label": "Create enum type \"RoomType\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "RoomType"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"RoomType\"",
+        "sql": "CREATE TYPE \"public\".\"RoomType\" AS ENUM ('SELF_CONTAIN', 'SINGLE_ROOM', 'FLAT')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.Status",
+    "label": "Create enum type \"Status\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "Status"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"Status\"",
+        "sql": "CREATE TYPE \"public\".\"Status\" AS ENUM ('PENDING', 'APPROVED', 'SUSPENDED')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.lodge",
+    "label": "Create table \"lodge\"",
+    "summary": "Creates table \"lodge\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "lodge"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"lodge\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"lodge\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"lodge\"",
+        "sql": "CREATE TABLE \"public\".\"lodge\" (\n  \"amenities\" text[] NOT NULL,\n  \"annual_rent\" float8 NOT NULL,\n  \"available_rooms\" int4 NOT NULL,\n  \"description\" text NOT NULL,\n  \"distance\" float8 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"images\" text[] NOT NULL,\n  \"landlord\" text NOT NULL,\n  \"name\" text NOT NULL,\n  \"roomType\" \"RoomType\" DEFAULT 'SELF_CONTAIN'::\"RoomType\" NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"lodge_amenities_elem_not_null_8aca8596\" CHECK (array_position(\"amenities\", NULL) IS NULL),\n  CONSTRAINT \"lodge_images_elem_not_null_2f12556f\" CHECK (array_position(\"images\", NULL) IS NULL)\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"lodge\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"lodge\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.refreshToken",
+    "label": "Create table \"refreshToken\"",
+    "summary": "Creates table \"refreshToken\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "refreshToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"refreshToken\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"refreshToken\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"refreshToken\"",
+        "sql": "CREATE TABLE \"public\".\"refreshToken\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"expiresAt\" timestamptz NOT NULL,\n  \"id\" text NOT NULL,\n  \"token\" text NOT NULL,\n  \"userId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"refreshToken\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"refreshToken\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.user",
+    "label": "Create table \"user\"",
+    "summary": "Creates table \"user\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"user\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"user\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"user\"",
+        "sql": "CREATE TABLE \"public\".\"user\" (\n  \"email\" text NOT NULL,\n  \"firstname\" text NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"lastname\" text NOT NULL,\n  \"password\" text NOT NULL,\n  \"role\" \"Roles\" DEFAULT 'STUDENT'::\"Roles\" NOT NULL,\n  \"status\" \"Status\" DEFAULT 'PENDING'::\"Status\" NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"user\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"user\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.refreshToken.refreshToken_token_key",
+    "label": "Add unique constraint on \"refreshToken\" (token)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "refreshToken_token_key",
+        "table": "refreshToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"refreshToken_token_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "refreshToken_token_key",
+          "public",
+          "\"public\".\"refreshToken\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"refreshToken_token_key\"",
+        "sql": "ALTER TABLE \"public\".\"refreshToken\" ADD CONSTRAINT \"refreshToken_token_key\" UNIQUE (\"token\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"refreshToken_token_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "refreshToken_token_key",
+          "public",
+          "\"public\".\"refreshToken\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.user.user_email_key",
+    "label": "Add unique constraint on \"user\" (email)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "user_email_key",
+        "table": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"user_email_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "user_email_key",
+          "public",
+          "\"public\".\"user\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"user_email_key\"",
+        "sql": "ALTER TABLE \"public\".\"user\" ADD CONSTRAINT \"user_email_key\" UNIQUE (\"email\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"user_email_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "user_email_key",
+          "public",
+          "\"public\".\"user\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.refreshToken.refreshToken_userId_idx_a489d58a",
+    "label": "Create index \"refreshToken_userId_idx_a489d58a\" on \"refreshToken\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "refreshToken_userId_idx_a489d58a",
+        "table": "refreshToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"refreshToken_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"refreshToken_userId_idx_a489d58a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"refreshToken_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"refreshToken_userId_idx_a489d58a\" ON \"public\".\"refreshToken\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"refreshToken_userId_idx_a489d58a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"refreshToken_userId_idx_a489d58a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.refreshToken.refreshToken_userId_fkey",
+    "label": "Add foreign key \"refreshToken_userId_fkey\" on \"refreshToken\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "refreshToken_userId_fkey",
+        "table": "refreshToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"refreshToken_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "refreshToken_userId_fkey",
+          "public",
+          "\"public\".\"refreshToken\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"refreshToken_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"refreshToken\"\nADD CONSTRAINT \"refreshToken_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"user\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"refreshToken_userId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "refreshToken_userId_fkey",
+          "public",
+          "\"public\".\"refreshToken\""
+        ]
+      }
+    ]
+  }
+]

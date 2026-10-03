@@ -1,0 +1,56 @@
+// use prisma-8
+
+model User {
+  id Int @id @default(autoincrement())
+  email String @unique
+  firstname String
+  lastname String
+  password String
+  role   pg.enum(Roles) @default("STUDENT")
+  status pg.enum(Status) @default("PENDING")
+  refreshToken RefreshToken[]
+
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid(2))
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Lodge {
+  id Int @id @default(autoincrement())
+  name String 
+  description String
+  roomType pg.enum(RoomType) @default("SELF_CONTAIN")
+  available_rooms Int
+  annual_rent Float
+  distance Float
+  landlord String
+  amenities String[]
+  images String[]
+
+}
+
+native_enum Roles {
+  STUDENT     = "STUDENT"
+  LODGE_OWNER = "LODGE_OWNER"
+  ADMIN       = "ADMIN"
+}
+
+native_enum Status {
+  PENDING   = "PENDING"
+  APPROVED  = "APPROVED"
+  SUSPENDED = "SUSPENDED"
+}
+
+native_enum RoomType {
+  SELF_CONTAIN = "SELF_CONTAIN"
+  SINGLE_ROOM  = "SINGLE_ROOM"
+  FLAT         = "FLAT"
+}

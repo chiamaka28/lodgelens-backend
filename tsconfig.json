@@ -2,14 +2,21 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
-    // "rootDir": "./src",
-    // "outDir": "./dist",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@generated/*": ["./src/generated/*"]
+    },
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
-    "target": "esnext",
-    "types": [],
+     "target": "ES2022",
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "types": [
+      "node"
+    ],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
@@ -27,18 +34,20 @@
     // Style Options
     // "noImplicitReturns": true,
     // "noImplicitOverride": true,
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     // "noFallthroughCasesInSwitch": true,
     // "noPropertyAccessFromIndexSignature": true,
 
     // Recommended Options
     "strict": true,
-    "jsx": "react-jsx",
+    // "jsx": "react-jsx",
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-  }
+    "resolveJsonModule": true,
+  },"include": ["src/**/*.ts","src/**/*.d.ts", "prisma.config.ts"],
+  "exclude": ["src/generated/**/*", "node_modules"]
 }
